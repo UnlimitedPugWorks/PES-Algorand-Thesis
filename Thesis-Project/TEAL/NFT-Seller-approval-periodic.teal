@@ -1,0 +1,965 @@
+#pragma version 8
+txn ApplicationID
+int 0
+==
+bnz main_l60
+txn OnCompletion
+int DeleteApplication
+==
+bnz main_l59
+txn OnCompletion
+int UpdateApplication
+==
+bnz main_l58
+txn OnCompletion
+int OptIn
+==
+bnz main_l57
+txn OnCompletion
+int CloseOut
+==
+bnz main_l47
+txn OnCompletion
+int NoOp
+==
+bnz main_l7
+err
+main_l7:
+txna ApplicationArgs 0
+byte "Start_Sale"
+==
+bnz main_l46
+txna ApplicationArgs 0
+byte "Buy_NFT"
+==
+bnz main_l45
+txna ApplicationArgs 0
+byte "receive_negative_response"
+==
+bnz main_l42
+txna ApplicationArgs 0
+byte "receive_positive_response"
+==
+bnz main_l38
+txna ApplicationArgs 0
+byte "Get_Refund"
+==
+bnz main_l28
+txna ApplicationArgs 0
+byte "Give_Refund"
+==
+bnz main_l18
+txna ApplicationArgs 0
+byte "Create_Box"
+==
+bnz main_l15
+err
+main_l15:
+byte "State"
+app_global_get
+int 0
+!=
+byte "State"
+app_global_get
+byte "Number_of_Payments"
+app_global_get
+int 1
++
+!=
+&&
+assert
+callsub isWaitingForResponse_2
+global GroupSize
+int 2
+==
+assert
+int 0
+callsub defaultTransactionChecks_0
+int 1
+callsub defaultTransactionChecks_0
+gtxn 0 Sender
+gtxn 1 Sender
+==
+assert
+gtxn 0 TypeEnum
+int pay
+==
+assert
+gtxn 0 Amount
+gtxn 1 Sender
+int 9
+callsub boxminimumbalance_4
+>=
+assert
+gtxn 1 TypeEnum
+int appl
+==
+assert
+gtxn 1 Sender
+box_get
+store 10
+store 9
+load 10
+int 0
+==
+bnz main_l17
+int 0
+return
+main_l17:
+gtxn 1 Sender
+int 9
+box_create
+pop
+gtxn 1 Sender
+int 0
+itob
+callsub setrefunds_7
+gtxn 1 Sender
+byte 0x00
+callsub setts_8
+byte "Number_of_Offers"
+byte "Number_of_Offers"
+app_global_get
+int 1
++
+app_global_put
+int 1
+return
+main_l18:
+byte "State"
+app_global_get
+byte "Number_of_Payments"
+app_global_get
+int 1
++
+==
+assert
+txn Sender
+byte "Seller_Address"
+app_global_get
+==
+assert
+int 0
+callsub defaultTransactionChecks_0
+txna Accounts 1
+box_get
+store 12
+store 11
+load 12
+assert
+int 0
+store 5
+int 0
+store 6
+txna Accounts 1
+callsub getts_6
+store 4
+main_l19:
+load 4
+byte "State"
+app_global_get
+<
+bnz main_l25
+txna Accounts 1
+byte "State"
+app_global_get
+itob
+extract 7 1
+callsub setts_8
+byte "State"
+app_global_get
+byte "Number_of_Payments"
+app_global_get
+int 1
++
+==
+bnz main_l24
+main_l21:
+load 5
+int 0
+>
+load 6
+int 1
+==
+||
+bnz main_l23
+main_l22:
+int 1
+return
+main_l23:
+itxn_begin
+int pay
+itxn_field TypeEnum
+global CurrentApplicationAddress
+itxn_field Sender
+txna Accounts 1
+itxn_field Receiver
+load 5
+txna Accounts 1
+int 9
+callsub boxminimumbalance_4
+load 6
+*
++
+itxn_field Amount
+int 0
+itxn_field Fee
+itxn_submit
+b main_l22
+main_l24:
+txna Accounts 1
+box_del
+pop
+int 1
+store 6
+byte "Number_of_Offers"
+byte "Number_of_Offers"
+app_global_get
+int 1
+-
+app_global_put
+b main_l21
+main_l25:
+byte "Success"
+app_global_get
+load 4
+int 1
+-
+getbit
+int 0
+==
+bnz main_l27
+main_l26:
+load 4
+int 1
++
+store 4
+b main_l19
+main_l27:
+load 5
+txna Accounts 1
+callsub getrefunds_5
++
+store 5
+b main_l26
+main_l28:
+int 0
+callsub defaultTransactionChecks_0
+txn Sender
+box_get
+store 8
+store 7
+load 8
+assert
+int 0
+store 5
+int 0
+store 6
+txn Sender
+callsub getts_6
+store 4
+main_l29:
+load 4
+byte "State"
+app_global_get
+<
+bnz main_l35
+txn Sender
+byte "State"
+app_global_get
+itob
+extract 7 1
+callsub setts_8
+byte "State"
+app_global_get
+byte "Number_of_Payments"
+app_global_get
+int 1
++
+==
+bnz main_l34
+main_l31:
+load 5
+int 0
+>
+load 6
+int 1
+==
+||
+bnz main_l33
+main_l32:
+int 1
+return
+main_l33:
+itxn_begin
+int pay
+itxn_field TypeEnum
+global CurrentApplicationAddress
+itxn_field Sender
+txn Sender
+itxn_field Receiver
+load 5
+txn Sender
+int 9
+callsub boxminimumbalance_4
+load 6
+*
++
+itxn_field Amount
+int 0
+itxn_field Fee
+itxn_submit
+b main_l32
+main_l34:
+txn Sender
+box_del
+pop
+int 1
+store 6
+byte "Number_of_Offers"
+byte "Number_of_Offers"
+app_global_get
+int 1
+-
+app_global_put
+b main_l31
+main_l35:
+byte "Success"
+app_global_get
+byte "State"
+app_global_get
+load 4
+-
+int 1
+-
+getbit
+int 0
+==
+bnz main_l37
+main_l36:
+load 4
+int 1
++
+store 4
+b main_l29
+main_l37:
+load 5
+txn Sender
+callsub getrefunds_5
++
+store 5
+b main_l36
+main_l38:
+callsub isWaitingForResponse_2
+int 0
+callsub defaultTransactionChecks_0
+txn Sender
+byte "Oracle_Id"
+app_global_get
+callsub appidtoaddress_1
+==
+assert
+byte "Seller_Address"
+app_global_get
+txna Accounts 1
+==
+assert
+byte "Success"
+byte "Success"
+app_global_get
+byte "State"
+app_global_get
+int 1
+-
+int 1
+setbit
+app_global_put
+byte "State"
+byte "State"
+app_global_get
+int 1
++
+app_global_put
+byte "State"
+app_global_get
+byte "Number_of_Payments"
+app_global_get
+int 1
++
+==
+bnz main_l41
+itxn_begin
+int pay
+itxn_field TypeEnum
+global CurrentApplicationAddress
+itxn_field Sender
+txna Accounts 1
+itxn_field Receiver
+byte "Funds"
+app_global_get
+itxn_field Amount
+int 0
+itxn_field Fee
+itxn_submit
+main_l40:
+int 1
+return
+main_l41:
+itxn_begin
+int axfer
+itxn_field TypeEnum
+txna Accounts 1
+itxn_field AssetReceiver
+int 1
+itxn_field AssetAmount
+txna Assets 0
+itxn_field XferAsset
+txna Accounts 1
+itxn_field AssetCloseTo
+int 0
+itxn_field Fee
+itxn_next
+int pay
+itxn_field TypeEnum
+global CurrentApplicationAddress
+itxn_field Sender
+txna Accounts 1
+itxn_field Receiver
+byte "Funds"
+app_global_get
+int 100000
++
+itxn_field Amount
+int 0
+itxn_field Fee
+itxn_submit
+b main_l40
+main_l42:
+callsub isWaitingForResponse_2
+int 0
+callsub defaultTransactionChecks_0
+txn Sender
+byte "Oracle_Id"
+app_global_get
+callsub appidtoaddress_1
+==
+assert
+byte "State"
+byte "State"
+app_global_get
+int 1
++
+app_global_put
+byte "State"
+app_global_get
+byte "Number_of_Payments"
+app_global_get
+int 1
++
+==
+bnz main_l44
+main_l43:
+int 1
+return
+main_l44:
+itxn_begin
+int axfer
+itxn_field TypeEnum
+txna Accounts 1
+itxn_field AssetReceiver
+int 1
+itxn_field AssetAmount
+txna Assets 0
+itxn_field XferAsset
+txna Accounts 1
+itxn_field AssetCloseTo
+int 0
+itxn_field Fee
+itxn_next
+int pay
+itxn_field TypeEnum
+global CurrentApplicationAddress
+itxn_field Sender
+txna Accounts 1
+itxn_field Receiver
+int 100000
+itxn_field Amount
+int 0
+itxn_field Fee
+itxn_submit
+b main_l43
+main_l45:
+callsub isWaitingForResponse_2
+global GroupSize
+int 2
+==
+assert
+gtxn 0 TypeEnum
+int pay
+==
+assert
+gtxn 0 Receiver
+global CurrentApplicationAddress
+==
+assert
+gtxn 1 TypeEnum
+int appl
+==
+assert
+gtxn 1 Sender
+gtxn 0 Sender
+==
+assert
+int 0
+callsub defaultTransactionChecks_0
+int 1
+callsub defaultTransactionChecks_0
+gtxn 0 Sender
+box_get
+store 3
+store 2
+load 3
+assert
+gtxn 0 Sender
+callsub getts_6
+int 0
+==
+assert
+gtxn 0 Amount
+byte "Number_of_Payments"
+app_global_get
+byte "State"
+app_global_get
+-
+int 1
++
+/
+store 0
+gtxn 0 Sender
+load 0
+itob
+callsub setrefunds_7
+byte "Funds"
+byte "Funds"
+app_global_get
+load 0
++
+app_global_put
+byte "State"
+app_global_get
+itob
+store 1
+gtxn 0 Sender
+load 1
+extract 7 1
+callsub setts_8
+int 1
+return
+main_l46:
+byte "State"
+app_global_get
+int 0
+==
+assert
+int 0
+callsub defaultTransactionChecks_0
+int 1
+callsub defaultTransactionChecks_0
+int 2
+callsub defaultTransactionChecks_0
+gtxn 0 TypeEnum
+int pay
+==
+assert
+gtxn 1 TypeEnum
+int appl
+==
+assert
+gtxn 2 TypeEnum
+int axfer
+==
+assert
+gtxn 0 Sender
+byte "Seller_Address"
+app_global_get
+==
+assert
+gtxn 1 Sender
+byte "Seller_Address"
+app_global_get
+==
+assert
+gtxn 2 Sender
+byte "Seller_Address"
+app_global_get
+==
+assert
+gtxn 0 Amount
+int 8
+global MinTxnFee
+*
+>=
+assert
+int 12
+gtxna 1 ApplicationArgs 2
+btoi
+%
+int 0
+==
+assert
+itxn_begin
+int pay
+itxn_field TypeEnum
+global CurrentApplicationAddress
+itxn_field Sender
+gtxna 1 Accounts 1
+itxn_field Receiver
+int 3
+global MinTxnFee
+*
+itxn_field Amount
+int 0
+itxn_field Fee
+itxn_next
+int appl
+itxn_field TypeEnum
+global CurrentApplicationAddress
+itxn_field Sender
+gtxna 1 Applications 1
+itxn_field ApplicationID
+byte "Receive_Request"
+itxn_field ApplicationArgs
+gtxna 1 Accounts 2
+itxn_field Accounts
+gtxna 1 Applications 0
+itxn_field Applications
+int 0
+itxn_field Fee
+itxn_submit
+itxn_begin
+int axfer
+itxn_field TypeEnum
+global CurrentApplicationAddress
+itxn_field AssetReceiver
+gtxn 2 XferAsset
+itxn_field XferAsset
+int 0
+itxn_field Fee
+itxn_submit
+gtxn 2 XferAsset
+callsub isLandRegistryToken_3
+byte "Asset_Id"
+gtxn 2 XferAsset
+app_global_put
+byte "Number_of_Payments"
+txna ApplicationArgs 2
+btoi
+app_global_put
+byte "State"
+int 1
+app_global_put
+byte "NFT_Price"
+txna ApplicationArgs 1
+btoi
+app_global_put
+byte "Start_Timestamp"
+global LatestTimestamp
+app_global_put
+int 1
+return
+main_l47:
+int 0
+callsub defaultTransactionChecks_0
+txn Sender
+box_get
+store 8
+store 7
+load 8
+assert
+int 0
+store 5
+int 0
+store 6
+txn Sender
+callsub getts_6
+store 4
+main_l48:
+load 4
+byte "State"
+app_global_get
+<
+bnz main_l54
+txn Sender
+byte "State"
+app_global_get
+itob
+extract 7 1
+callsub setts_8
+byte "State"
+app_global_get
+byte "Number_of_Payments"
+app_global_get
+int 1
++
+==
+bnz main_l53
+main_l50:
+load 5
+int 0
+>
+load 6
+int 1
+==
+||
+bnz main_l52
+main_l51:
+int 1
+return
+main_l52:
+itxn_begin
+int pay
+itxn_field TypeEnum
+global CurrentApplicationAddress
+itxn_field Sender
+txn Sender
+itxn_field Receiver
+load 5
+txn Sender
+int 9
+callsub boxminimumbalance_4
+load 6
+*
++
+itxn_field Amount
+int 0
+itxn_field Fee
+itxn_submit
+b main_l51
+main_l53:
+txn Sender
+box_del
+pop
+int 1
+store 6
+byte "Number_of_Offers"
+byte "Number_of_Offers"
+app_global_get
+int 1
+-
+app_global_put
+b main_l50
+main_l54:
+byte "Success"
+app_global_get
+byte "State"
+app_global_get
+load 4
+-
+int 1
+-
+getbit
+int 0
+==
+bnz main_l56
+main_l55:
+load 4
+int 1
++
+store 4
+b main_l48
+main_l56:
+load 5
+txn Sender
+callsub getrefunds_5
++
+store 5
+b main_l55
+main_l57:
+int 0
+return
+main_l58:
+int 0
+return
+main_l59:
+byte "State"
+app_global_get
+int 0
+==
+byte "State"
+app_global_get
+byte "Number_of_Payments"
+app_global_get
+int 1
++
+==
+||
+assert
+int 0
+callsub defaultTransactionChecks_0
+byte "Seller_Address"
+app_global_get
+txna Accounts 1
+==
+assert
+byte "Number_of_Offers"
+app_global_get
+int 0
+==
+assert
+int 1
+return
+main_l60:
+int 0
+callsub defaultTransactionChecks_0
+txn NumAccounts
+int 2
+==
+assert
+txn NumApplications
+int 1
+==
+assert
+byte "Oracle_Id"
+txna Applications 1
+app_global_put
+byte "Seller_Address"
+txna Accounts 1
+app_global_put
+byte "Land_Registry_Address"
+txna Accounts 2
+app_global_put
+byte "State"
+int 0
+app_global_put
+byte "NFT_Manager_Id"
+global CallerApplicationID
+app_global_put
+byte "Number_of_Offers"
+int 0
+app_global_put
+byte "Funds"
+int 0
+app_global_put
+byte "Success"
+int 0
+itob
+app_global_put
+int 1
+return
+
+// defaultTransactionChecks
+defaultTransactionChecks_0:
+proto 1 0
+frame_dig -1
+global GroupSize
+<
+assert
+frame_dig -1
+gtxns RekeyTo
+global ZeroAddress
+==
+assert
+frame_dig -1
+gtxns CloseRemainderTo
+global ZeroAddress
+==
+assert
+frame_dig -1
+gtxns AssetCloseTo
+global ZeroAddress
+==
+assert
+retsub
+
+// app_id_to_address
+appidtoaddress_1:
+proto 1 1
+byte "appID"
+frame_dig -1
+itob
+concat
+sha512_256
+retsub
+
+// isWaitingForResponse
+isWaitingForResponse_2:
+proto 0 0
+byte "State"
+app_global_get
+int 1
+>=
+assert
+byte "State"
+app_global_get
+byte "Number_of_Payments"
+app_global_get
+<=
+assert
+retsub
+
+// isLandRegistryToken
+isLandRegistryToken_3:
+proto 1 0
+frame_dig -1
+asset_params_get AssetCreator
+store 14
+store 13
+load 14
+assert
+load 13
+byte "Land_Registry_Address"
+app_global_get
+==
+assert
+retsub
+
+// box_minimum_balance
+boxminimumbalance_4:
+proto 2 1
+int 2500
+int 400
+frame_dig -1
+frame_dig -2
+len
++
+*
++
+retsub
+
+// get_refunds
+getrefunds_5:
+proto 1 1
+frame_dig -1
+int 0
+int 8
+box_extract
+btoi
+retsub
+
+// get_ts
+getts_6:
+proto 1 1
+frame_dig -1
+int 8
+int 1
+box_extract
+btoi
+retsub
+
+// set_refunds
+setrefunds_7:
+proto 2 0
+frame_dig -2
+int 0
+frame_dig -1
+box_replace
+retsub
+
+// set_ts
+setts_8:
+proto 2 0
+frame_dig -2
+int 8
+frame_dig -1
+box_replace
+retsub

@@ -1,0 +1,7 @@
+{
+    "nft_name" : "nft_name",
+    "nft_unit_name": "nft_un",
+    "decimals": 1,
+    "nft_price": 50,
+    "period": 1
+}

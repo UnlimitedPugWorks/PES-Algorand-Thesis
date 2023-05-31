@@ -1,0 +1,199 @@
+#pragma version 8
+txn ApplicationID
+int 0
+==
+bnz main_l18
+txn OnCompletion
+int DeleteApplication
+==
+bnz main_l17
+txn OnCompletion
+int UpdateApplication
+==
+bnz main_l16
+txn OnCompletion
+int OptIn
+==
+bnz main_l15
+txn OnCompletion
+int CloseOut
+==
+bnz main_l14
+txn OnCompletion
+int NoOp
+==
+bnz main_l7
+err
+main_l7:
+txna ApplicationArgs 0
+byte "Register_Land"
+==
+bnz main_l13
+txna ApplicationArgs 0
+byte "Transfer_Registered_Land"
+==
+bnz main_l12
+txna ApplicationArgs 0
+byte "Land_Clawback"
+==
+bnz main_l11
+err
+main_l11:
+global GroupSize
+int 1
+==
+assert
+txn NumAccounts
+int 1
+==
+assert
+txn NumAssets
+int 1
+==
+assert
+txn Sender
+global CreatorAddress
+==
+assert
+txna Accounts 1
+txna Assets 0
+callsub checkNFTBalance_0
+itxn_begin
+int axfer
+itxn_field TypeEnum
+global CurrentApplicationAddress
+itxn_field AssetReceiver
+txna Accounts 1
+itxn_field AssetSender
+int 1
+itxn_field AssetAmount
+txna Assets 0
+itxn_field XferAsset
+int 0
+itxn_field Fee
+itxn_submit
+int 1
+return
+main_l12:
+global GroupSize
+int 1
+==
+assert
+txn NumAppArgs
+int 1
+==
+assert
+txn NumAccounts
+int 1
+==
+assert
+txn NumAssets
+int 1
+==
+assert
+txn Sender
+global CreatorAddress
+==
+assert
+txna Accounts 1
+txna Assets 0
+callsub checkAssetOptIn_1
+global CurrentApplicationAddress
+txna Assets 0
+callsub checkNFTBalance_0
+itxn_begin
+int axfer
+itxn_field TypeEnum
+txna Accounts 1
+itxn_field AssetReceiver
+int 1
+itxn_field AssetAmount
+txna Assets 0
+itxn_field XferAsset
+int 0
+itxn_field Fee
+itxn_submit
+int 1
+return
+main_l13:
+global GroupSize
+int 2
+==
+assert
+txn NumAppArgs
+int 5
+==
+assert
+itxn_begin
+int acfg
+itxn_field TypeEnum
+txna ApplicationArgs 3
+itxn_field ConfigAssetName
+txna ApplicationArgs 4
+itxn_field ConfigAssetUnitName
+txna ApplicationArgs 1
+itxn_field ConfigAssetURL
+txna ApplicationArgs 2
+itxn_field ConfigAssetMetadataHash
+int 0
+itxn_field ConfigAssetDecimals
+int 1
+itxn_field ConfigAssetTotal
+global CurrentApplicationAddress
+itxn_field ConfigAssetManager
+global CurrentApplicationAddress
+itxn_field ConfigAssetFreeze
+global CurrentApplicationAddress
+itxn_field ConfigAssetClawback
+int 0
+itxn_field Fee
+itxn_submit
+int 1
+return
+main_l14:
+int 0
+return
+main_l15:
+int 1
+return
+main_l16:
+int 0
+return
+main_l17:
+int 0
+return
+main_l18:
+int 1
+return
+
+// checkNFTBalance
+checkNFTBalance_0:
+proto 2 0
+frame_dig -2
+frame_dig -1
+asset_holding_get AssetBalance
+store 1
+store 0
+load 1
+assert
+load 0
+int 1
+==
+assert
+retsub
+
+// checkAssetOptIn
+checkAssetOptIn_1:
+proto 2 0
+frame_dig -2
+frame_dig -1
+asset_holding_get AssetBalance
+store 3
+store 2
+load 3
+assert
+load 2
+int 0
+>=
+assert
+retsub

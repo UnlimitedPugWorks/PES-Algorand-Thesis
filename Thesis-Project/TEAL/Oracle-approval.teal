@@ -1,0 +1,228 @@
+#pragma version 8
+txn ApplicationID
+int 0
+==
+bnz main_l22
+txn OnCompletion
+int DeleteApplication
+==
+bnz main_l21
+txn OnCompletion
+int UpdateApplication
+==
+bnz main_l20
+txn OnCompletion
+int OptIn
+==
+bnz main_l19
+txn OnCompletion
+int CloseOut
+==
+bnz main_l18
+txn OnCompletion
+int NoOp
+==
+bnz main_l7
+err
+main_l7:
+txna ApplicationArgs 0
+byte "Receive_Request"
+==
+bnz main_l17
+txna ApplicationArgs 0
+byte "Answer_Request"
+==
+bnz main_l10
+err
+main_l10:
+global GroupSize
+int 1
+==
+assert
+txn GroupIndex
+int 0
+==
+assert
+int 0
+callsub defaultTransactionChecks_0
+txn TypeEnum
+int appl
+==
+assert
+txn Sender
+global CreatorAddress
+==
+assert
+txna Applications 2
+byte "State"
+app_global_get_ex
+store 4
+store 3
+load 4
+int 1
+==
+assert
+txna Applications 2
+byte "Number_of_Payments"
+app_global_get_ex
+store 6
+store 5
+load 6
+int 1
+==
+bnz main_l16
+load 3
+int 1
+==
+assert
+main_l12:
+txna ApplicationArgs 1
+btoi
+int 1
+==
+bnz main_l15
+byte "receive_negative_response"
+store 2
+main_l14:
+itxn_begin
+int appl
+itxn_field TypeEnum
+txna Applications 2
+itxn_field ApplicationID
+load 2
+itxn_field ApplicationArgs
+txna Accounts 1
+itxn_field Accounts
+txna Applications 0
+itxn_field Applications
+txna Assets 0
+itxn_field Assets
+int 0
+itxn_field Fee
+itxn_next
+int appl
+itxn_field TypeEnum
+txna Applications 1
+itxn_field ApplicationID
+load 2
+itxn_field ApplicationArgs
+txna Accounts 1
+itxn_field Accounts
+int 0
+itxn_field Fee
+itxn_submit
+int 1
+return
+main_l15:
+byte "receive_positive_response"
+store 2
+b main_l14
+main_l16:
+load 3
+load 5
+<=
+assert
+load 3
+int 0
+!=
+assert
+b main_l12
+main_l17:
+global GroupSize
+int 2
+==
+assert
+txn GroupIndex
+int 1
+==
+assert
+int 0
+callsub defaultTransactionChecks_0
+int 1
+callsub defaultTransactionChecks_0
+gtxn 0 TypeEnum
+int pay
+==
+assert
+gtxn 0 Amount
+int 3
+global MinTxnFee
+*
+>=
+assert
+gtxn 1 TypeEnum
+int appl
+==
+assert
+gtxn 1 NumAppArgs
+int 1
+==
+assert
+gtxna 1 Applications 1
+byte "State"
+app_global_get_ex
+store 1
+store 0
+load 1
+int 1
+==
+assert
+load 0
+int 0
+==
+assert
+itxn_begin
+int pay
+itxn_field TypeEnum
+global CurrentApplicationAddress
+itxn_field Sender
+gtxna 1 Accounts 1
+itxn_field Receiver
+int 2
+global MinTxnFee
+*
+itxn_field Amount
+int 0
+itxn_field Fee
+itxn_submit
+int 1
+return
+main_l18:
+int 0
+return
+main_l19:
+int 0
+return
+main_l20:
+int 0
+return
+main_l21:
+int 0
+return
+main_l22:
+int 1
+return
+
+// defaultTransactionChecks
+defaultTransactionChecks_0:
+proto 1 0
+frame_dig -1
+global GroupSize
+<
+assert
+frame_dig -1
+gtxns RekeyTo
+global ZeroAddress
+==
+assert
+frame_dig -1
+gtxns CloseRemainderTo
+global ZeroAddress
+==
+assert
+frame_dig -1
+gtxns AssetCloseTo
+global ZeroAddress
+==
+assert
+retsub

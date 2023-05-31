@@ -1,0 +1,487 @@
+#pragma version 8
+txn ApplicationID
+int 0
+==
+bnz main_l22
+txn OnCompletion
+int DeleteApplication
+==
+bnz main_l19
+txn OnCompletion
+int UpdateApplication
+==
+bnz main_l18
+txn OnCompletion
+int OptIn
+==
+bnz main_l17
+txn OnCompletion
+int CloseOut
+==
+bnz main_l16
+txn OnCompletion
+int NoOp
+==
+bnz main_l7
+err
+main_l7:
+txna ApplicationArgs 0
+byte "Start_Sale"
+==
+bnz main_l15
+txna ApplicationArgs 0
+byte "Make_Offer"
+==
+bnz main_l14
+txna ApplicationArgs 0
+byte "Accept_Offer"
+==
+bnz main_l13
+txna ApplicationArgs 0
+byte "Reject_Offer"
+==
+bnz main_l12
+err
+main_l12:
+callsub hasSaleStarted_1
+txn Sender
+byte "Seller_Address"
+app_global_get
+==
+assert
+global GroupSize
+int 1
+==
+assert
+txn NumAppArgs
+int 1
+==
+assert
+txn NumAccounts
+int 1
+==
+assert
+txn TypeEnum
+int appl
+==
+assert
+int 0
+callsub defaultTransactionChecks_0
+itxn_begin
+int pay
+itxn_field TypeEnum
+global CurrentApplicationAddress
+itxn_field Sender
+txna Accounts 1
+itxn_field Receiver
+txna Accounts 1
+byte "Local_Offer"
+app_local_get
+itxn_field Amount
+global MinTxnFee
+itxn_field Fee
+itxn_submit
+txna Accounts 1
+byte "Local_Offer"
+int 0
+app_local_put
+byte "Active_Offers"
+byte "Active_Offers"
+app_global_get
+int 1
+-
+app_global_put
+int 1
+return
+main_l13:
+callsub hasSaleStarted_1
+txn Sender
+byte "Seller_Address"
+app_global_get
+==
+assert
+global GroupSize
+int 1
+==
+assert
+txn NumAppArgs
+int 1
+==
+assert
+txn NumAccounts
+int 1
+==
+assert
+txn NumAssets
+int 1
+==
+assert
+txn TypeEnum
+int appl
+==
+assert
+int 0
+callsub defaultTransactionChecks_0
+itxn_begin
+int pay
+itxn_field TypeEnum
+global CurrentApplicationAddress
+itxn_field Sender
+byte "Seller_Address"
+app_global_get
+itxn_field Receiver
+txna Accounts 1
+byte "Local_Offer"
+app_local_get
+itxn_field Amount
+global MinTxnFee
+itxn_field Fee
+itxn_next
+int axfer
+itxn_field TypeEnum
+global CurrentApplicationAddress
+itxn_field Sender
+txna Accounts 1
+itxn_field AssetReceiver
+int 1
+itxn_field AssetAmount
+txna Assets 0
+itxn_field XferAsset
+global MinTxnFee
+itxn_field Fee
+itxn_submit
+txna Accounts 1
+byte "Local_Offer"
+int 0
+app_local_put
+byte "Active_Offers"
+app_global_get
+int 0
+>
+assert
+byte "Active_Offers"
+byte "Active_Offers"
+app_global_get
+int 1
+-
+app_global_put
+byte "State_of_Sale"
+int 2
+app_global_put
+int 1
+return
+main_l14:
+callsub hasSaleStarted_1
+global GroupSize
+int 2
+==
+assert
+gtxn 0 TypeEnum
+int pay
+==
+assert
+gtxn 0 Receiver
+global CurrentApplicationAddress
+==
+assert
+gtxn 1 TypeEnum
+int appl
+==
+assert
+int 0
+callsub defaultTransactionChecks_0
+int 1
+callsub defaultTransactionChecks_0
+gtxn 0 Sender
+byte "Local_Offer"
+gtxn 0 Amount
+global MinTxnFee
+-
+app_local_put
+byte "Active_Offers"
+byte "Active_Offers"
+app_global_get
+int 1
++
+app_global_put
+int 1
+return
+main_l15:
+callsub isSaleNotOpen_2
+txn GroupIndex
+int 1
+==
+assert
+gtxn 0 Sender
+byte "Seller_Address"
+app_global_get
+==
+assert
+gtxn 1 Sender
+byte "Seller_Address"
+app_global_get
+==
+assert
+gtxn 2 Sender
+byte "Seller_Address"
+app_global_get
+==
+assert
+gtxn 0 Receiver
+global CurrentApplicationAddress
+==
+assert
+gtxn 1 ApplicationID
+global CurrentApplicationID
+==
+assert
+gtxn 2 AssetReceiver
+global CurrentApplicationAddress
+==
+assert
+global GroupSize
+int 3
+==
+assert
+gtxn 0 TypeEnum
+int pay
+==
+assert
+gtxn 0 Amount
+int 2
+int 100000
+*
+int 3
+global MinTxnFee
+*
++
+>=
+assert
+gtxn 1 TypeEnum
+int appl
+==
+assert
+gtxn 2 TypeEnum
+int axfer
+==
+assert
+gtxn 2 AssetAmount
+int 1
+==
+assert
+int 0
+callsub defaultTransactionChecks_0
+int 1
+callsub defaultTransactionChecks_0
+int 2
+callsub defaultTransactionChecks_0
+itxn_begin
+int axfer
+itxn_field TypeEnum
+global CurrentApplicationAddress
+itxn_field AssetReceiver
+txna Assets 0
+itxn_field XferAsset
+itxn_submit
+byte "State_of_Sale"
+int 1
+app_global_put
+byte "Asset_Id"
+txna Assets 0
+app_global_put
+int 1
+return
+main_l16:
+callsub saleStarted_3
+txn Sender
+byte "Local_Offer"
+app_local_get
+int 0
+>
+assert
+global GroupSize
+int 1
+==
+assert
+txn TypeEnum
+int appl
+==
+assert
+int 0
+callsub defaultTransactionChecks_0
+itxn_begin
+int pay
+itxn_field TypeEnum
+global CurrentApplicationAddress
+itxn_field Sender
+txn Sender
+itxn_field Receiver
+txn Sender
+byte "Local_Offer"
+app_local_get
+itxn_field Amount
+global MinTxnFee
+itxn_field Fee
+itxn_submit
+txn Sender
+byte "Local_Offer"
+int 0
+app_local_put
+byte "Active_Offers"
+byte "Active_Offers"
+app_global_get
+int 1
+-
+app_global_put
+int 1
+return
+main_l17:
+callsub hasSaleStarted_1
+global GroupSize
+int 1
+==
+assert
+int 0
+callsub defaultTransactionChecks_0
+txn Sender
+byte "Local_Offer"
+int 0
+app_local_put
+int 1
+return
+main_l18:
+int 0
+return
+main_l19:
+txn Sender
+global CreatorAddress
+==
+assert
+txna Accounts 1
+byte "Seller_Address"
+app_global_get
+==
+assert
+byte "Active_Offers"
+app_global_get
+int 0
+==
+assert
+txn NumAssets
+int 1
+==
+assert
+byte "State_of_Sale"
+app_global_get
+int 1
+==
+bnz main_l21
+int 1
+return
+main_l21:
+int 0
+callsub defaultTransactionChecks_0
+itxn_begin
+int axfer
+itxn_field TypeEnum
+global CurrentApplicationAddress
+itxn_field Sender
+global CreatorAddress
+itxn_field AssetReceiver
+int 1
+itxn_field AssetAmount
+txna Assets 0
+itxn_field XferAsset
+txna Accounts 1
+itxn_field AssetCloseTo
+int 0
+itxn_field Fee
+itxn_next
+int pay
+itxn_field TypeEnum
+global CurrentApplicationAddress
+itxn_field Sender
+txna Accounts 1
+itxn_field Receiver
+int 100000
+itxn_field Amount
+int 0
+itxn_field Fee
+itxn_submit
+int 1
+return
+main_l22:
+global GroupSize
+int 1
+==
+assert
+int 0
+callsub defaultTransactionChecks_0
+byte "Active_Offers"
+int 0
+app_global_put
+byte "State_of_Sale"
+int 0
+app_global_put
+byte "Asset_Id"
+int 0
+app_global_put
+byte "Seller_Address"
+txna Accounts 1
+app_global_put
+int 1
+return
+
+// defaultTransactionChecks
+defaultTransactionChecks_0:
+proto 1 0
+frame_dig -1
+global GroupSize
+<
+assert
+frame_dig -1
+gtxns RekeyTo
+global ZeroAddress
+==
+assert
+frame_dig -1
+gtxns CloseRemainderTo
+global ZeroAddress
+==
+assert
+frame_dig -1
+gtxns AssetCloseTo
+global ZeroAddress
+==
+assert
+retsub
+
+// hasSaleStarted
+hasSaleStarted_1:
+proto 0 0
+byte "State_of_Sale"
+app_global_get
+int 1
+==
+assert
+retsub
+
+// isSaleNotOpen
+isSaleNotOpen_2:
+proto 0 0
+byte "State_of_Sale"
+app_global_get
+int 0
+==
+assert
+retsub
+
+// saleStarted
+saleStarted_3:
+proto 0 0
+byte "State_of_Sale"
+app_global_get
+int 0
+!=
+assert
+retsub

@@ -30,7 +30,7 @@ def approval():
 
 
     # To verify the authenticity of this smart contract, insert the CID in this field an compile it
-    cid_contracts = Bytes("Qmdp6ECf3Pag9MwCmyMMFyMPTLzm9hPAA1Ca4Mht9TwZSA")
+    cid_contracts = Bytes("QmPQjsqpWyPZoq3v2FCNbQPugX9PZgrTT3CWYhJQyEJqZM")
 
     # LOCAL
 
